@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-module.exports = {
+export default {
   preset: 'ts-jest',
   globals: {
     'ts-jest': {
@@ -24,4 +24,5 @@ module.exports = {
     },
   },
   testEnvironment: 'jsdom',
+  transform: {},
 };

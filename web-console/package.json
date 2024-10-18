@@ -48,6 +48,7 @@
     "check-licenses": "license-checker --production --onlyAllow 'Apache-1.1;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;MIT;ISC;CC0-1.0;OFL-1.1' --summary",
     "start": "webpack serve"
   },
+  "type": "module",
   "engines": {
     "node": ">=20"
   },
@@ -157,9 +158,9 @@
     "snarkdown": "^2.0.0",
     "style-loader": "^2.0.0",
     "stylelint": "^16.1.0",
-    "ts-jest": "^29.1.2",
-    "ts-loader": "^9.4.2",
-    "ts-node": "^10.9.1",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "~5.4.5",
     "webpack": "^5.89.0",
     "webpack-bundle-analyzer": "^4.10.1",
