@@ -24,5 +24,4 @@ module.exports = Object.assign(common, {
   },
   setupFilesAfterEnv: ['<rootDir>src/setup-tests.ts'],
   testMatch: ['**/src/**/?(*.)+(spec).(ts|tsx)'],
-  transformIgnorePatterns: ['/node_modules/(?!(d3-.+)/)'],
 });

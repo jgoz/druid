@@ -16,15 +16,12 @@
  * limitations under the License.
  */
 
-const { createDefaultPreset } = require('ts-jest');
+const { createJsWithTsPreset } = require('ts-jest');
 
 module.exports = {
-  // globals: {
-  //   'ts-jest': {
-  //     tsconfig: './tsconfig.test.json',
-  //   },
-  // },
   testEnvironment: 'jsdom',
   transformIgnorePatterns: ['/node_modules/(?!(d3-.+)/)'],
-  ...createDefaultPreset(),
+  ...createJsWithTsPreset({
+    tsconfig: './tsconfig.test.json',
+  }),
 };
