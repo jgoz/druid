@@ -8,31 +8,18 @@
     "type": "git",
     "url": "https://github.com/apache/druid"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-      "\\.s?css$": "identity-obj-proxy"
-    },
-    "testMatch": [
-      "**/?(*.)+(spec).ts?(x)"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>src/setup-tests.ts"
-    ]
-  },
   "prettier": "@awesome-code-style/prettier-config",
   "scripts": {
     "compile": "./script/build",
     "pretest": "./script/build",
-    "jest": "jest --config jest.unit.config.js src",
+    "jest": "jest --config jest.config.js src",
     "test-base": "npm run eslint && npm run sasslint && npm run prettify-check && npm run jest",
     "test": "npm run test-base -- --silent 2>&1",
     "test-ci": "npm run test-base -- --coverage",
     "test-e2e": "jest --runInBand --config jest.e2e.config.js e2e-tests",
     "codecov": "codecov --disable=gcov -p ..",
     "coverage": "jest --coverage src",
-    "update-snapshots": "jest -u --config jest.unit.config.js",
+    "update-snapshots": "jest -u --config jest.config.js",
     "autofix": "npm run eslint-fix && npm run sasslint-fix && npm run prettify",
     "eslint": "eslint",
     "eslint-fix": "npm run eslint -- --fix",
@@ -48,7 +35,6 @@
     "check-licenses": "license-checker --production --onlyAllow 'Apache-1.1;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;MIT;ISC;CC0-1.0;OFL-1.1' --summary",
     "start": "webpack serve"
   },
-  "type": "module",
   "engines": {
     "node": ">=20"
   },

@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-import common from './jest.common.config.js';
+const common = require('./jest.common.config');
 
-export default {
-  ...common,
+module.exports = Object.assign(common, {
   moduleNameMapper: {
     '\\.s?css$': 'identity-obj-proxy',
   },
   setupFilesAfterEnv: ['<rootDir>src/setup-tests.ts'],
   testMatch: ['**/src/**/?(*.)+(spec).(ts|tsx)'],
-};
+  transformIgnorePatterns: ['/node_modules/(?!(d3-.+)/)'],
+});

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
-import common from './jest.common.config.js';
+const common = require('./jest.common.config');
 
-export default { ...common, testMatch: ['**/?(*.)+(spec).ts?(x)'], testEnvironment: 'node' };
+module.exports = Object.assign(common, {
+  testMatch: ['**/?(*.)+(spec).ts?(x)'],
+  testEnvironment: 'node',
+});

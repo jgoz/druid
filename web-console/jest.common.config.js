@@ -16,13 +16,15 @@
  * limitations under the License.
  */
 
-export default {
-  preset: 'ts-jest',
-  globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.test.json',
-    },
-  },
+const { createDefaultPreset } = require('ts-jest');
+
+module.exports = {
+  // globals: {
+  //   'ts-jest': {
+  //     tsconfig: './tsconfig.test.json',
+  //   },
+  // },
   testEnvironment: 'jsdom',
-  transform: {},
+  transformIgnorePatterns: ['/node_modules/(?!(d3-.+)/)'],
+  ...createDefaultPreset(),
 };
