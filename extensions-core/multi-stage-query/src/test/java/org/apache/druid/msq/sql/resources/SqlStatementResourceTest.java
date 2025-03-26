@@ -870,10 +870,34 @@ public class SqlStatementResourceTest extends MSQTestBase
         resource.doGetResults(FINISHED_SELECT_MSQ_QUERY, -1L, null, null, makeOkRequest()).getStatus()
     );
 
+    final String tooLongString = StringUtils.repeat("a", 256);
     Assert.assertEquals(
-        "attachment; filename=my-file.ndjson",
+        Response.Status.BAD_REQUEST.getStatusCode(),
+        resource.doGetResults(FINISHED_SELECT_MSQ_QUERY, 0L, ResultFormat.OBJECTLINES.name(), tooLongString, makeOkRequest()).getStatus()
+    );
+
+    final String invalidChars = "/\\:*?\"<>|\0\n\r";
+    for (char invalid : invalidChars.toCharArray()) {
+      final String filename = StringUtils.format("in%cvalid", invalid);
+      Assert.assertEquals(
+          StringUtils.format("Validates invalid filename \"%s\"", filename),
+          Response.Status.BAD_REQUEST.getStatusCode(),
+          resource.doGetResults(FINISHED_SELECT_MSQ_QUERY, 0L, ResultFormat.OBJECTLINES.name(), filename, makeOkRequest()).getStatus()
+      );
+    }
+
+    Assert.assertEquals(
+        "attachment; filename=\"my-file.ndjson\"",
         getHeader(
             resource.doGetResults(FINISHED_SELECT_MSQ_QUERY, 0L, ResultFormat.OBJECTLINES.name(), "my-file.ndjson", makeOkRequest()),
+            SqlStatementResource.CONTENT_DISPOSITION_RESPONSE_HEADER
+        )
+    );
+
+    Assert.assertEquals(
+        "attachment; filename=\"my file;has semicolon.ndjson\"",
+        getHeader(
+            resource.doGetResults(FINISHED_SELECT_MSQ_QUERY, 0L, ResultFormat.OBJECTLINES.name(), "my file;has semicolon.ndjson", makeOkRequest()),
             SqlStatementResource.CONTENT_DISPOSITION_RESPONSE_HEADER
         )
     );

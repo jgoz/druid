@@ -114,6 +114,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -124,6 +125,7 @@ public class SqlStatementResource
   public static final String RESULT_FORMAT = "__resultFormat";
   public static final String CONTENT_DISPOSITION_RESPONSE_HEADER = "Content-Disposition";
   private static final Logger log = new Logger(SqlStatementResource.class);
+  private static final Pattern INVALID_FILENAME_CHARS = Pattern.compile("[/\\\\:*?\"<>|\0\n\r]+");
   private final SqlStatementFactory msqSqlStatementFactory;
   private final ObjectMapper jsonMapper;
   private final OverlordClient overlordClient;
@@ -311,18 +313,29 @@ public class SqlStatementResource
       );
       throwIfQueryIsNotSuccessful(queryId, statusPlus);
 
-      final String contentDispositionHeaderValue = filename != null ? StringUtils.format("attachment; filename=%s", filename) : null;
+      if (filename != null) {
+        if (filename.length() > 255) {
+          throw InvalidInput.exception(
+              "Filename cannot exceed 255 characters (got %d). Please pass a shorter filename.",
+              filename.length()
+          );
+        }
+        if (INVALID_FILENAME_CHARS.matcher(filename).find()) {
+          throw InvalidInput.exception(
+              "Filename contains one or more invalid characters. Invalid characters include /, \\, :, *, ?, \", <, >, |, \\0 (null byte), \\n, and \\r."
+          );
+        }
+      }
+
+      final String contentDispositionHeaderValue = filename != null ? StringUtils.format("attachment; filename=\"%s\"", filename) : null;
 
       Optional<List<ColumnNameAndTypes>> signature = SqlStatementResourceHelper.getSignature(msqControllerTask);
       if (!signature.isPresent() || MSQControllerTask.isIngestion(msqControllerTask.getQuerySpec())) {
         // Since it's not a select query, nothing to return.
-        final Response.ResponseBuilder responseBuilder = Response.ok();
-
-        if (contentDispositionHeaderValue != null) {
-          responseBuilder.header(CONTENT_DISPOSITION_RESPONSE_HEADER, contentDispositionHeaderValue);
-        }
-
-        return responseBuilder.build();
+        return addContentDisposition(
+            Response.ok(),
+            contentDispositionHeaderValue
+        ).build();
       }
 
       // returning results
@@ -331,13 +344,10 @@ public class SqlStatementResource
       results = getResultYielder(queryId, page, msqControllerTask, closer);
       if (!results.isPresent()) {
         // no results, return empty
-        final Response.ResponseBuilder responseBuilder = Response.ok();
-
-        if (contentDispositionHeaderValue != null) {
-          responseBuilder.header(CONTENT_DISPOSITION_RESPONSE_HEADER, contentDispositionHeaderValue);
-        }
-
-        return responseBuilder.build();
+        return addContentDisposition(
+            Response.ok(),
+            contentDispositionHeaderValue
+        ).build();
       }
 
       ResultFormat preferredFormat = getPreferredResultFormat(resultFormat, msqControllerTask.getQuerySpec());
@@ -349,12 +359,7 @@ public class SqlStatementResource
           new CountingOutputStream(outputStream),
           preferredFormat
       ));
-
-      if (contentDispositionHeaderValue != null) {
-        responseBuilder.header(CONTENT_DISPOSITION_RESPONSE_HEADER, contentDispositionHeaderValue);
-      }
-
-      return responseBuilder.build();
+      return addContentDisposition(responseBuilder, contentDispositionHeaderValue).build();
     }
 
 
@@ -592,7 +597,6 @@ public class SqlStatementResource
       return Optional.empty();
     }
   }
-
 
   private Optional<SqlStatementResult> getStatementStatus(
       String queryId,
@@ -1026,6 +1030,17 @@ public class SqlStatementResource
         queryId,
         MSQControllerTask.TYPE
     );
+  }
+
+  private static Response.ResponseBuilder addContentDisposition(
+      Response.ResponseBuilder responseBuilder,
+      String value
+  )
+  {
+    if (value != null) {
+      responseBuilder.header(CONTENT_DISPOSITION_RESPONSE_HEADER, value);
+    }
+    return responseBuilder;
   }
 
 }
